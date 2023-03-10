@@ -53,6 +53,7 @@ exports.processLogin = async function(req,res){
         }
     }else{
         res.status(400);
+        
         res.render("pages/login",{
             "error":"Please fill in all the fields.",
             isLoggedIn:false
