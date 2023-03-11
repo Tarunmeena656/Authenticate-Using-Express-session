@@ -5,6 +5,7 @@ const logger = require('morgan')
 const session = require('express-session')
 const mongoStore = require('connect-mongo');
 const router = require("./routes");
+const passport = require("passport");
 
 
 
@@ -34,6 +35,9 @@ app.use(session({
     store:store
 }))
 
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use(router)
 

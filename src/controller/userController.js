@@ -15,50 +15,59 @@ exports.homePage = async function(req, res) {
     
 }
 
-exports.loginPage = function(req,res){
-     if(req.session.user){
-        res.redirect("/logout");
-    }else{
-
-        res.render("pages/login",{
-            "error":"",
-            "isLoggedIn": false
-        });
-    }
+exports.loginPage = function(req,res,next){
+   try {
+      if(req.session.user){
+         res.redirect("/logout");
+     }else{
+ 
+         res.render("pages/login",{
+             "error":"",
+             "isLoggedIn": false
+         });
+     }
+   } catch (error) {
+       next(error)
+   }
 }
 
-exports.processLogin = async function(req,res){
+exports.processLogin = async function(req,res,next){
     
-    let email = req.body.email;
-    let password = req.body.password;
-  
-    if(email && password){
-        let existingUser = await User.findOne({email:email}).select('password');
-        if(existingUser){
-            let match = await existingUser.isValidate(password);
-            if(match){
-                req.session.user = existingUser._id;
-                res.redirect("/");
-            }else{
-                res.render("pages/login",{
-                    "error":"Invalid password",
-                    isLoggedIn: false
-                });
-            }
-        }else{
-            res.render("pages/login",{
-                "error":"User with that email does not exist.",
-                isLoggedIn:false
-            });
-        }
-    }else{
-        res.status(400);
-        
-        res.render("pages/login",{
-            "error":"Please fill in all the fields.",
-            isLoggedIn:false
-        });
-    }
+   try {
+     let email = req.body.email;
+     let password = req.body.password;
+   
+     if(email && password){
+         let existingUser = await User.findOne({email:email}).select('password');
+         if(existingUser){
+             let match = await existingUser.isValidate(password);
+             if(match){
+                 req.session.user = existingUser._id;
+                 res.redirect("/");
+             }else{
+                 res.render("pages/login",{
+                     "error":"Invalid password",
+                     isLoggedIn: false
+                 });
+             }
+         }else{
+             res.render("pages/login",{
+                 "error":"User with that email does not exist.",
+                 isLoggedIn:false
+             });
+         }
+     }else{
+         res.status(400);
+         
+         res.render("pages/login",{
+             "error":"Please fill in all the fields.",
+             isLoggedIn:false
+         });
+     }
+   } catch (error) {
+    next(error)
+    
+   }
 }
 
 exports.signupPage = function(req,res){
@@ -72,35 +81,39 @@ exports.signupPage = function(req,res){
     }
 }
 
-exports.processSignup = async function(req,res){
-    let username = req.body.username
-    let email = req.body.email;
-    let password = req.body.password;
-    
-    if(username && email && password){
-        let existingUser = await User.findOne({email:email});
-        if(!existingUser){
-            let newUser = new User({
-                username,
-                email,
-                password
-            });
-            newUser.save();
-            res.render('pages/login',{
-                "error":"",
-               isLoggedIn:true 
-            })
+exports.processSignup = async function(req,res,next){
+    try {
+        let username = req.body.username
+        let email = req.body.email;
+        let password = req.body.password;
+        
+        if(username && email && password){
+            let existingUser = await User.findOne({email:email});
+            if(!existingUser){
+                let newUser = new User({
+                    username,
+                    email,
+                    password
+                });
+                newUser.save();
+                res.render('pages/login',{
+                    "error":"",
+                   isLoggedIn:true 
+                })
+            }else{
+                res.render("pages/signup",{
+                    "error":"User with that email already exists.",
+                    isLoggedIn:false
+                });
+            }
         }else{
             res.render("pages/signup",{
-                "error":"User with that email already exists.",
+                "error":"Please fill in all the fields.",
                 isLoggedIn:false
             });
         }
-    }else{
-        res.render("pages/signup",{
-            "error":"Please fill in all the fields.",
-            isLoggedIn:false
-        });
+    } catch (error) {
+        next(error)
     }
 }
 
