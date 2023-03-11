@@ -8,7 +8,7 @@ router.get("/",homePage);
 
 router.get("/login",loginPage); 
 
-router.post("/login",passport.authenticate('local',{ successReturnToOrRedirect:"/" , failureRedirect:"/login"}),processLogin); 
+router.post("/login",passport.authenticate('local',{session:false}),processLogin); 
 
 router.get("/signup",signupPage);
 
